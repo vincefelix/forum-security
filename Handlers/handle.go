@@ -30,11 +30,12 @@ func Handlers() {
 	}
 
 	// Initialisation des rate limiter pour certains endpoints
-	limiter := rate.NewLimiter(10, 1)          // Limiteur global
+	limiter := rate.NewLimiter(30, 10)          // Limiteur global
 	loginLimiter := rate.NewLimiter(2, 1)     // Limiteur spécifique à /login
 
 	// Utilisation du middleware rate limiting pour chaque endpoint
 	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 		switch r.URL.Path {
 		case "/":
 			if !newLimiterMiddleware(r, limiter) {

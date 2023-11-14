@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	db "forum/Database"
 	"net/http"
 	"net/mail"
 	"strconv"
@@ -12,6 +11,8 @@ import (
 
 	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
+
+	db "forum/Database"
 )
 
 func HashPassword(password string) (string, error) {
@@ -44,6 +45,8 @@ func CreateSession(w http.ResponseWriter, iduser string, tab db.Db) {
 		Name:    "session_token",
 		Value:   sessionToken,
 		Expires: expiresAt,
+		HttpOnly: true,
+		Secure:   true, 
 		// SameSite: http.SameSiteDefaultMode,
 	})
 }
