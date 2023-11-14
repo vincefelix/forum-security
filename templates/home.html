@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head" .}}
+<body>
+                        <!--  ---------- navbar ----------   -->
+    {{template "navbar" .}}
+                    <!--  ---------- navbar close ----------   -->
+
+    <div class="container">
+                    <!--  ---------- left-sidebar ----------   -->
+        <div class="right-sidebar">
+            <div class="sidebar-news">
+                <img src="/static/front-tools/images/filter.png" class="info-icon">
+                <h3>Filter</h3>
+                <div id="activeFilter" class="sidebar-filter">
+                    <ul>
+                        <li><a href="/myprofil/posts" onclick="activateFilter(this)"><span>Posts</span></a></li>
+                        <li><a href="/myprofil/favorites" onclick="activateFilter(this)"><span>Favorites</span></a></li>
+                        <li><a href="/myprofil/comments" onclick="activateFilter(this)"><span>Comments</span></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sidebar-filter-category">
+                <img src="/static/front-tools/images/category.png" class="info-icon">
+                <h3>Categories</h3>
+                <div class="sidebar-category">
+                    <a href="/filter?filter=education"><img src="/static/front-tools/images/education.png">Education</a>
+                    <a href="/filter?filter=sport"><img src="/static/front-tools/images/sport.png">Sport</a>
+                    <a href="/filter?filter=art"><img src="/static/front-tools/images/art.png" class="radius">Art & Culture</a>
+                    <a href="/filter?filter=cinema"><img src="/static/front-tools/images/cinema.png">Cinema</a>
+                    <a href="/filter?filter=health"><img src="/static/front-tools/images/health.png">Health</a>
+                    <a href="/filter?filter=others"><img src="/static/front-tools/images/other.png">Others</a>
+                </div>
+            </div>
+        </div>
+                    <!--  ---------- main-content ----------   -->
+        <div class="main-content"  style="width: 50%;">
+            <!-- -------------- create post div ---------------- -->
+            <div class="create-post">
+                <form action="/home" id="postForm" method="post" enctype="multipart/form-data">
+                    <div class="create-post-input">
+                        <img src="{{.CurrentPP}}" alt="Profile Image">
+                        <!-- adding title  -->
+                        <div class="title-input">
+                            <p>Title :</p>
+                            <input class="input-title" type="text" name="title" maxlength="25" required >
+                        </div>
+                        <!-- adding post text  -->
+                        <textarea rows="auto" id="postContent" placeholder="Write a post" name="post_content" wrap="soft" style="overflow-y: scroll; white-space: pre-wrap;" maxlength="1500"></textarea>
+                        <p id="errorMessage" style="color: red; display: none;">You cannot exceed 15 lines.</p>
+                    </div>
+                    <!-- image upload preview  -->
+                    <div class="image-upload_Preview">
+                        <img id="imagePreview" src="" alt="Image Preview">
+                    </div>
+                    <hr>
+                    <div class="create-post-links">
+                        <!-- adding categories -->
+                        <div class="category-dropdown">
+                            <li id="categories-toggle">Categories</li>
+                            <div class="category-list hidden">
+                                <div>
+                                    <input type="checkbox" id="education" value="education" name="education">
+                                    <label for="education">Education</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="sport" name="sport" value="sport">
+                                    <label for="sport">Sport</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="art_culture" name="art_culture" value="art & culture">
+                                    <label for="art_culture">Art & Culture</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="cinema" name="cinema" value="cinema">
+                                    <label for="cinema">Cinema</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="health" name="health" value="health">
+                                    <label for="health">Health</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="others" name="others" value="others" checked>
+                                    <label for="others">Others</label>
+                                </div>
+                            </div>
+                        </div>
+                         <!--upload image side-->
+                        <div class="image-uploading">
+                            <li>
+                                <label for="image"  class="upload-label" style="cursor: pointer; display: flex; align-items: center;">
+                                    <img src="/static/front-tools/images/photo.png">
+                                    <span>Image</span> 
+                                </label>
+                                <input type="file" name="image" id="image" style="display: none;" accept=".jpeg, .png,.gif, .avif, .jpg, .JPG, .JPEG, .GIF, .PNG, .AVIF" onchange="checkFile()">
+                            </li>
+                            <span id="error" style="color: red;"></span> <!--displaying error if uploaded image is greater than 20MB with js-->
+                        </div>
+                        <!--end of upload image side-->
+
+                        <!-- submit button  -->
+                        <button type="submit" name="subpost" value="SP">Post</button> 
+                    </div>
+                </form>
+            </div>
+            
+            <!------------ -display post & comment----------->
+           {{template "mainContent" .}}
+        </div>
+    </div> 
+      <!-- ------------------ footer -------------- -->
+      {{template "footer" .}}
+</body>
+</html>
