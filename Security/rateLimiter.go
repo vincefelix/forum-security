@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 )
+
 // windowData est une structure qui contient les informations sur les requêtes et la dernière requête pour une adresse IP.
 type windowData struct {
 	requests    []time.Time
@@ -51,9 +52,6 @@ func NewLimiterMiddleware(r *http.Request, windowSize time.Duration, maxRequests
 	}
 
 	// Vérifier si le nombre de requêtes est supérieur à maxRequests.
-	if len(data.requests) > maxRequests {
-		return false
-	}
 
-	return true
+	return len(data.requests) > maxRequests
 }
