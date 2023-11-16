@@ -4,18 +4,17 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"io"
 )
 
-func encrypt(data []byte, key []byte) ([]byte, error) {
+func Encrypt(data []byte, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
 
-	nonce := make([]byte, 12) // Crée un nonce de 12 octets aléatoires
+	nonce := make([]byte, 12) // creating 12 random octets used once
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		return nil, err
 	}
@@ -25,30 +24,30 @@ func encrypt(data []byte, key []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	ciphertext := aesgcm.Seal(nil, nonce, data, nil) // Chiffre les données avec le mode CBC
-	ciphertext = append(nonce, ciphertext...) // Concatène le nonce avec le texte chiffré
-	return ciphertext, nil
+	Ctext := aesgcm.Seal(nil, nonce, data, nil) // Ciphering using cipher block chaining  methode
+	Ctext = append(nonce, Ctext...)             // Concatenating generated nonce with ciphered text
+	return Ctext, nil
 }
 
-func decrypt(ciphertext []byte, key []byte) ([]byte, error) {
+func Decrypt(Ctext []byte, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(ciphertext) < aes.BlockSize {
-		return nil, errors.New("invalid ciphertext")
+	if len(Ctext) < aes.BlockSize {
+		return nil, errors.New("invalid Ctext")
 	}
 
-	nonce := ciphertext[:12] // Récupère le nonce à partir du texte chiffré
-	ciphertext = ciphertext[12:]
+	nonce := Ctext[:12] // retrievieng nonce from ciphered text
+	Ctext = Ctext[12:]
 
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return nil, err
 	}
 
-	plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil) // Déchiffre les données avec le mode CBC
+	plaintext, err := aesgcm.Open(nil, nonce, Ctext, nil) // unciphering using cipher block chaining method
 	if err != nil {
 		return nil, err
 	}
