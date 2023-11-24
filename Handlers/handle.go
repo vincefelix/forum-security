@@ -27,8 +27,8 @@ func Handlers() {
 
     // Initialisation des paramètres de rate limiting
     windowSize := time.Minute // Fenêtre de temps d'une minute
-    maxRequests := 30         // Nombre maximum de requêtes autorisées
-	maxLoginTimeout := 6             // Nombre maximum de tentatives de connexions autorisées
+    maxRequests := 40         // Nombre maximum de requêtes autorisées
+	maxLoginTimeout := 15            // Nombre maximum de tentatives de connexions autorisées
 	// Utilisation du middleware rate limiting pour chaque endpoint
 	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")

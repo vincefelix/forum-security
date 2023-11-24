@@ -53,5 +53,8 @@ func NewLimiterMiddleware(r *http.Request, windowSize time.Duration, maxRequests
 
 	// Vérifier si le nombre de requêtes est supérieur à maxRequests.
 
-	return len(data.requests) > maxRequests
+	if (len(data.requests) > maxRequests){
+		return false
+	}
+	return true
 }
