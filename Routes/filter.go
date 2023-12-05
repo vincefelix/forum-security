@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 
-	auth "forum/Authentification"
+	auth "forum/Authentication"
 	Com "forum/Communication"
 	db "forum/Database"
 	tools "forum/tools"
@@ -78,8 +78,8 @@ func Filter(w http.ResponseWriter, r *http.Request, database db.Db) {
 		auth.Snippets(w, 500)
 		return
 	}
-	current_pp, _, errpp := auth.HelpersBA("users", database, "pp", " WHERE id_user='"+Id_user+"'", "")
-	current_cover, _, errcover := auth.HelpersBA("users", database, "pc", " WHERE id_user='"+Id_user+"'", "")
+	current_pp, _, errpp := auth.HelpersBA("users",database, "pp", " WHERE id_user='"+Id_user+"'", "")
+	current_cover, _, errcover := auth.HelpersBA("users",database, "pc", " WHERE id_user='"+Id_user+"'", "")
 	//handle error
 	if errpp || errcover {
 		fmt.Println("error pp,", errpp, " error cover", errcover)

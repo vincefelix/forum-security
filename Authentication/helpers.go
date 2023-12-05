@@ -2,6 +2,9 @@ package auth
 
 import (
 	"fmt"
+	// auth "forum/Authentication"
+	db "forum/Database"
+	"math/rand"
 	"net/http"
 	"net/mail"
 	"strconv"
@@ -11,8 +14,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
-
-	db "forum/Database"
 )
 
 func HashPassword(password string) (string, error) {
@@ -45,8 +46,7 @@ func CreateSession(w http.ResponseWriter, iduser string, tab db.Db) {
 		Name:    "session_token",
 		Value:   sessionToken,
 		Expires: expiresAt,
-		HttpOnly: true,
-		Secure:   true, 
+		Path:    "/",
 		// SameSite: http.SameSiteDefaultMode,
 	})
 }
@@ -68,9 +68,11 @@ func Snippets(w http.ResponseWriter, statusCode int) {
 func DisplayFile(w http.ResponseWriter, templatePath string) {
 	file, errExecutionFile := template.ParseFiles(templatePath)
 	if errExecutionFile != nil {
-		fmt.Println("Probléme de parsing  de fichier", templatePath)
-
+		fmt.Println("Probléme de parsing ou d'execution de fichier", templatePath)
+		Snippets(w, http.StatusInternalServerError)
+		return
 	}
+
 	errExecutionFile = file.Execute(w, nil)
 	if errExecutionFile != nil {
 		fmt.Println("Probléme de parsing ou d'execution de fichier", templatePath)
@@ -131,4 +133,24 @@ func FieldsLimited(field string, min, max int) bool {
 
 func NotAllow(s string) bool {
 	return strings.Contains(s, "'") || strings.Contains(s, "\"")
+}
+func GenerateUsername(name string, tab db.Db) string {
+	username := name + strconv.Itoa(rand.Intn(101))
+	_, _, confirmusername := HelpersBA("users", tab, "username", " WHERE username='"+username+"'", username)
+	if confirmusername {
+		return GenerateUsername(name, tab)
+	}
+	return username
+}
+func Familyname(name string) (string, string) {
+	name = strings.Trim(name, " ")
+	arrayname := strings.Split(name, " ")
+	limit := len(arrayname)
+	if limit == 1 {
+		return name, name
+	}
+	lastfamilyname := arrayname[limit-1]
+	familynames := arrayname[0 : limit-1]
+	firstfamilyname := strings.Join(familynames, " ")
+	return firstfamilyname, lastfamilyname
 }
