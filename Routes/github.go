@@ -3,7 +3,6 @@ package Route
 import (
 	"encoding/json"
 	"fmt"
-	Github "forum/Authentication"
 	auth "forum/Authentication"
 	db "forum/Database"
 	"io"
@@ -15,20 +14,29 @@ import (
 
 func HandleGitHubLogin(w http.ResponseWriter, r *http.Request, tab db.Db) {
 	auth.CheckCookie(w, r, tab)
+	if r.Method != "GET" {
+		fmt.Printf("❌ cannot access to /auth/github/login page with %s method", r.Method)
+		auth.Snippets(w, 405)
+		return
+	}
 
 	// redirecting user to githubAuth interface
 	parameter := url.Values{}
-	parameter.Set("client_id", Github.GitClientID)
-	parameter.Set("redirect_uri", Github.GitRedirectURI)
+	parameter.Set("client_id", auth.GitClientID)
+	parameter.Set("redirect_uri", auth.GitRedirectURI)
 	parameter.Set("scope", "user:email") // ask permission to user's email
 	parameter.Set("response_type", "code")
-	redirectURL := Github.GitAuthURL + "?" + parameter.Encode()
+	redirectURL := auth.GitAuthURL + "?" + parameter.Encode()
 	http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
 }
 
 func HandleGitHubCallback(w http.ResponseWriter, r *http.Request, tab db.Db) {
 	auth.CheckCookie(w, r, tab)
-
+	if r.Method != "GET" {
+		fmt.Printf("❌ cannot access to /auth/github/callback page with %s method", r.Method)
+		auth.Snippets(w, 405)
+		return
+	}
 	// Retrieving permission code
 	code := r.URL.Query().Get("code")
 	// fmt.Println("code is here", code)
@@ -36,10 +44,10 @@ func HandleGitHubCallback(w http.ResponseWriter, r *http.Request, tab db.Db) {
 	// exchnaging code with token access
 	tokenURL := "https://github.com/login/oauth/access_token"
 	data := url.Values{}
-	data.Set("client_id", Github.GitClientID)
-	data.Set("client_secret", Github.GitClientSecret)
+	data.Set("client_id", auth.GitClientID)
+	data.Set("client_secret", auth.GitClientSecret)
 	data.Set("code", code)
-	data.Set("redirect_uri", Github.GitRedirectURI)
+	data.Set("redirect_uri", auth.GitRedirectURI)
 	data.Set("grant_type", "authorization_code")
 
 	tokenResp, err := http.Post(tokenURL, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()))
@@ -89,13 +97,15 @@ func HandleGitHubCallback(w http.ResponseWriter, r *http.Request, tab db.Db) {
 	}
 
 	var final = struct {
-		Name  interface{}
-		Email interface{}
-		Id    interface{}
+		Name           interface{}
+		Email          interface{}
+		Id             interface{}
+		UsernameGithub interface{}
 	}{
-		Name:  userResp["name"],
-		Email: userResp["email"],
-		Id:    userResp["id"],
+		Name:           userResp["name"],
+		Email:          userResp["email"],
+		Id:             userResp["id"],
+		UsernameGithub: userResp["login"],
 	}
 	fmt.Println("final id", final.Id)
 
@@ -106,7 +116,12 @@ func HandleGitHubCallback(w http.ResponseWriter, r *http.Request, tab db.Db) {
 		// fmt.Println("id", Id)
 		Email := ""
 		if final.Email == nil {
-			Email = numeroString + name
+			// 92727101+Seynabou96@users.noreply.github.com
+			login := ""
+			if final.UsernameGithub != nil {
+				login = (final.UsernameGithub).(string)
+			}
+			Email = numeroString + "+" + login + "@users.noreply.github.com"
 		} else {
 			Email, _ = (final.Email).(string)
 
