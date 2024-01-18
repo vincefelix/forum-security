@@ -21,8 +21,6 @@
 				<h2>Internal server error</h2>
 				{{else if eq . "405"}}
                 <h2>Method not allowed</h2>
-				{{else if eq . "429"}}
-                <h2>Too many requests<hr>Please wait a moment</h2>
 				{{else}}
 				<h3>Something wrong</h3>
 				{{end}}
