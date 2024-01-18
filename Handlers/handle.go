@@ -1,6 +1,7 @@
 package hdle
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"time"
@@ -23,6 +24,19 @@ func Handlers(tabb db.Db) {
 	checkloginTimeOut := false
 	checkotherTimeOut := false
 
+	// Configuration TLS avec suites de chiffrement
+	server := &http.Server{
+		Addr:         ":8080",
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  15 * time.Second,
+		TLSConfig: &tls.Config{
+			//suites de chiffrement
+			MinVersion:   tls.VersionTLS12,
+			CipherSuites: []uint16{tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384},
+		},
+	}
+
 	// Serveur HTTP
 	http.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Votre code existant pour le routeur HTTP
@@ -36,7 +50,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 
@@ -49,7 +63,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 			Rt.CreateAccountPage(w, r, tab)
@@ -61,7 +75,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 
@@ -74,7 +88,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 
@@ -87,7 +101,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 
@@ -100,7 +114,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 
@@ -110,11 +124,13 @@ func Handlers(tabb db.Db) {
 			if !sec.LoginLimiterMiddleware(r, windowSize, maxLoginRequests) {
 				auth.Snippets(w, 429)
 				checkloginTimeOut = true
+				checkotherTimeOut = true
 				return
 			}
 			if checkloginTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkloginTimeOut = false
+				checkotherTimeOut = false
 			}
 
 			Rt.LoginPage(w, r, tab)
@@ -126,7 +142,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 			Rt.LogOutHandler(w, r, tab)
@@ -138,7 +154,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 
@@ -152,7 +168,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 
@@ -165,7 +181,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 			Rt.Profil_fav(w, r, tab)
@@ -177,7 +193,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 			Rt.Profil_comment(w, r, tab)
@@ -189,7 +205,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 			Rt.Filter(w, r, tab)
@@ -201,7 +217,7 @@ func Handlers(tabb db.Db) {
 				return
 			}
 			if checkotherTimeOut {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				checkotherTimeOut = false
 			}
 			Rt.Indexfilter(w, r, tab)
@@ -217,7 +233,7 @@ func Handlers(tabb db.Db) {
 	fmt.Println("|                                                    |")
 	fmt.Println("📡----------------------------------------------------📡")
 
-	if errr := http.ListenAndServeTLS(":8080", "Security/server.crt", "Security/server.key", nil); errr != nil {
+	if errr := server.ListenAndServeTLS("Security/server.crt", "Security/server.key"); errr != nil {
 		fmt.Printf("Erreur de serveur HTTPS : %s\n", errr)
 	}
 
