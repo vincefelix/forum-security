@@ -1,10 +1,10 @@
 package sec
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
-	"fmt"
 )
 
 // windowData est une structure qui contient les informations sur les requêtes et la dernière requête pour une adresse IP.
@@ -23,6 +23,7 @@ var (
 
 func NewLimiterMiddleware(r *http.Request, windowSize time.Duration, maxRequests int) bool {
 	clientIP := r.RemoteAddr
+	fmt.Println("clienttttttIP:", clientIP)
 	now := time.Now()
 
 	// Verrouiller le mutex pour éviter l'accès concurrent à ipMap.
@@ -54,7 +55,7 @@ func NewLimiterMiddleware(r *http.Request, windowSize time.Duration, maxRequests
 
 	// Vérifier si le nombre de requêtes est supérieur à maxRequests.
 	fmt.Println(len(data.requests))
-	if (len(data.requests) > maxRequests){
+	if len(data.requests) > maxRequests {
 		data.requests = nil
 		return false
 	}

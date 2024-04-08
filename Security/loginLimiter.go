@@ -1,10 +1,11 @@
 package sec
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
-	"fmt"
 )
 
 // LoginwindowData est une structure qui contient les informations sur les requêtes et la dernière requête pour une adresse IP.
@@ -22,7 +23,8 @@ var (
 // newLimiterMiddleware est une fonction middleware qui implémente le rate limiting.
 
 func LoginLimiterMiddleware(r *http.Request, windowSize time.Duration, maxRequests int) bool {
-	clientIP := r.RemoteAddr
+	clientIP := strings.Split(r.RemoteAddr, ":")[0]
+	fmt.Println("clienttttttIP:", clientIP)
 	now := time.Now()
 
 	// Verrouiller le mutex pour éviter l'accès concurrent à ipMap.
@@ -55,10 +57,9 @@ func LoginLimiterMiddleware(r *http.Request, windowSize time.Duration, maxReques
 
 	// Vérifier si le nombre de requêtes est supérieur à maxRequests.
 	fmt.Println(len(data.requests))
-	if (len(data.requests) > maxRequests){
+	if len(data.requests) > maxRequests {
 		data.requests = nil
 		return false
 	}
 	return true
 }
-
